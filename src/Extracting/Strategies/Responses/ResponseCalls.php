@@ -38,7 +38,28 @@ class ResponseCalls extends Strategy
      */
     public function __invoke(Route $route, ReflectionClass $controller, ReflectionFunctionAbstract $method, array $routeRules, array $context = [])
     {
+        // Only relevant if we're using bearer/token authentication.
+         if (stripos($context['headers']['Authorization'], 'Bearer') !== false) {
+            $token = $this->getToken();
+            // Only change if we have a token.
+            if (!empty($token)) {
+                $context['headers']['Authorization'] = "Bearer {$token}";
+            }
+        }
         return $this->makeResponseCallIfEnabledAndNoSuccessResponses($route, $routeRules, $context);
+    }
+    /**
+     * Get the api token to use for authentication by jwt/passport
+     * @return string|null
+     */
+    protected function getToken()
+    {
+        $tokenMethod         = config('scribe.auth.token_method') ?? null;
+        $userdata            = config('scribe.auth.user') ?? [];
+        $model               = config('scribe.auth.user_class') ?? '';
+        $user                = !empty($model) && !empty($userdata) ? $model::where($userdata)->first() : null;
+
+        return !empty($tokenMethod) && !empty($user) ? call_user_func_array($tokenMethod, ['user' => $user]) : null;
     }
 
     public function makeResponseCallIfEnabledAndNoSuccessResponses(Route $route, array $routeRules, array $context)
