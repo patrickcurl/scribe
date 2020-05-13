@@ -61,6 +61,14 @@ return [
          * Markdown and HTML are supported.
          */
         'extra_info' => 'You can retrieve your token by visiting your dashboard and clicking <b>Generate API token</b>.',
+        
+        /**
+         *  Used by ResponseCalls to generate the token for a specific user. 
+         *
+         */
+        'user_data'         => ['email' => 'admin@admin.com'], // how to lookup user used for auth.
+        'token_method'      => 'App\User::getToken', // how to generate the token, recommend making a static method to do so if using jwt/postman.
+        'user_class'        => 'App\User' // What class is the user in..i.e. App\User, App\Models\User.
     ],
 
     /*
